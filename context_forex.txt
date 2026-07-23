@@ -1,0 +1,70 @@
+======================================================================
+STOCKY :: FOREX TECHNICAL CONTEXT (relative strength / macro)
+Generated: 2026-06-06 22:14:27
+Universe: 4 tickers  |  Modeled OK: 4
+======================================================================
+
+Lens: relative currency strength + macro. Prices quoted to 4 decimals
+(1 pip = 0.0001). USDINR strength = tailwind for IT/Pharma exporters,
+headwind for import-heavy sectors and banks.
+
+### USDINR=X
+  Last Close    : 94.9500
+  Daily Return  : -0.9%
+  RSI(14)       : 46.6
+  SMA(20)       : 95.7818
+  SMA(50)       : 94.6053
+  Trend Read    : Mixed / no clean trend
+  Model Accuracy: 43.8%  (backtested on 20% hold-out)
+  Prediction    : DOWN (next-day direction)
+  Confidence    : 64.0%
+  Train Rows    : 1251
+
+### EURUSD=X
+  Last Close    : 1.1527
+  Daily Return  : -0.7%
+  RSI(14)       : 32.9
+  SMA(20)       : 1.1651
+  SMA(50)       : 1.1669
+  Trend Read    : Downtrend (price < SMA20 < SMA50)
+  Model Accuracy: 52.0%  (backtested on 20% hold-out)
+  Prediction    : DOWN (next-day direction)
+  Confidence    : 71.0%
+  Train Rows    : 1250
+
+### GBPUSD=X
+  Last Close    : 1.3337
+  Daily Return  : -0.7%
+  RSI(14)       : 38.4
+  SMA(20)       : 1.3446
+  SMA(50)       : 1.3454
+  Trend Read    : Downtrend (price < SMA20 < SMA50)
+  Model Accuracy: 52.2%  (backtested on 20% hold-out)
+  Prediction    : UP (next-day direction)
+  Confidence    : 60.0%
+  Train Rows    : 1251
+
+### AUDUSD=X
+  Last Close    : 0.7050
+  Daily Return  : -1.2%
+  RSI(14)       : 37.3
+  SMA(20)       : 0.7165
+  SMA(50)       : 0.7127
+  Trend Read    : Mixed / no clean trend
+  Model Accuracy: 55.0%  (backtested on 20% hold-out)
+  Prediction    : UP (next-day direction)
+  Confidence    : 57.0%
+  Train Rows    : 1251
+
+----------------------------------------------------------------------
+SUMMARY
+----------------------------------------------------------------------
+Ticker        Signal  Conf     Acc      RSI     
+USDINR=X      DOWN    64.0%    43.8%    46.6    
+EURUSD=X      DOWN    71.0%    52.0%    32.9    
+GBPUSD=X      UP      60.0%    52.2%    38.4    
+AUDUSD=X      UP      57.0%    55.0%    37.3    
+
+NOTE: Signals are probabilistic tilts, not certainties. Apply the
+stocky risk rules (RSI Reality Check, 1:2 R:R, confidence filters)
+before acting. Educational use only — not financial advice.

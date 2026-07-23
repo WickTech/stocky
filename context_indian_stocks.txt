@@ -1,0 +1,74 @@
+======================================================================
+STOCKY :: INDIAN EQUITY TECHNICAL CONTEXT (NSE swing/delivery)
+Generated: 2026-06-06 22:14:20
+Universe: 5 tickers  |  Modeled OK: 4
+======================================================================
+
+Lens: NSE swing/delivery setups. RSI > 70 = overbought (RSI Reality
+Check). Targets should respect a minimum 1:2 risk-to-reward once the
+operator constructs entry/stop/target levels.
+
+### RELIANCE.NS
+  STATUS        : DATA UNAVAILABLE — data unavailable (fetch returned nothing)
+
+### TCS.NS
+  Last Close    : 2198.90
+  Daily Return  : -1.9%
+  RSI(14)       : 39.1
+  SMA(20)       : 2279.37
+  SMA(50)       : 2378.02
+  Trend Read    : Downtrend (price < SMA20 < SMA50)
+  Model Accuracy: 47.9%  (backtested on 20% hold-out)
+  Prediction    : UP (next-day direction)
+  Confidence    : 65.0%
+  Train Rows    : 1188
+
+### INFY.NS
+  Last Close    : 1197.50
+  Daily Return  : -0.3%
+  RSI(14)       : 50.7
+  SMA(20)       : 1172.74
+  SMA(50)       : 1218.87
+  Trend Read    : Mixed / no clean trend
+  Model Accuracy: 46.6%  (backtested on 20% hold-out)
+  Prediction    : UP (next-day direction)
+  Confidence    : 81.0%
+  Train Rows    : 1188
+
+### HDFCBANK.NS
+  Last Close    : 747.05
+  Daily Return  : -0.9%
+  RSI(14)       : 41.1
+  SMA(20)       : 759.54
+  SMA(50)       : 773.64
+  Trend Read    : Downtrend (price < SMA20 < SMA50)
+  Model Accuracy: 51.3%  (backtested on 20% hold-out)
+  Prediction    : DOWN (next-day direction)
+  Confidence    : 62.5%
+  Train Rows    : 1188
+
+### SBIN.NS
+  Last Close    : 977.70
+  Daily Return  : -0.2%
+  RSI(14)       : 47.2
+  SMA(20)       : 960.39
+  SMA(50)       : 1011.29
+  Trend Read    : Mixed / no clean trend
+  Model Accuracy: 47.9%  (backtested on 20% hold-out)
+  Prediction    : DOWN (next-day direction)
+  Confidence    : 70.0%
+  Train Rows    : 1188
+
+----------------------------------------------------------------------
+SUMMARY
+----------------------------------------------------------------------
+Ticker        Signal  Conf     Acc      RSI     
+RELIANCE.NS   N/A     -        -        -       
+TCS.NS        UP      65.0%    47.9%    39.1    
+INFY.NS       UP      81.0%    46.6%    50.7    
+HDFCBANK.NS   DOWN    62.5%    51.3%    41.1    
+SBIN.NS       DOWN    70.0%    47.9%    47.2    
+
+NOTE: Signals are probabilistic tilts, not certainties. Apply the
+stocky risk rules (RSI Reality Check, 1:2 R:R, confidence filters)
+before acting. Educational use only — not financial advice.

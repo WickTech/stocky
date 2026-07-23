@@ -1,0 +1,20 @@
+# virtualenv
+.venv/
+venv/
+env/
+
+# python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# local env / secrets (NEVER commit real API keys)
+.env
+.env.*
+!.env.example
+
+# internal notes
+.project_instructions.md
+
+# os
+.DS_Store
