@@ -1,5 +1,6 @@
 # stocky
 
+[![CI](https://github.com/WickTech/stocky/actions/workflows/ci.yml/badge.svg)](https://github.com/WickTech/stocky/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.12-blue?logo=python&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-RandomForest-F7931E?logo=scikit-learn&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)
