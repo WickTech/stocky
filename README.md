@@ -1,5 +1,10 @@
 # stocky
 
+![Python](https://img.shields.io/badge/python-3.12-blue?logo=python&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-RandomForest-F7931E?logo=scikit-learn&logoColor=white)
+![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)
+![Status](https://img.shields.io/badge/status-educational-orange.svg)
+
 A **localized machine-learning workspace** for daily Indian-equity and forex direction
 signals. `stocky` runs entirely on your machine: it pulls 5 years of price history,
 engineers technical features, trains a per-ticker Random Forest, backtests it, and emits
@@ -192,3 +197,9 @@ Edit the constants near the top of `market_intelligence.py`:
 `stocky` is a personal research and educational tool. It does not execute trades and does not
 constitute financial advice. Markets carry risk; you are solely responsible for any decisions
 made with this information.
+
+---
+
+## License
+
+[MIT](LICENSE) © Rishabh Verma
