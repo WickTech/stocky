@@ -40,10 +40,10 @@ except ImportError:  # pragma: no cover - dependency guard
         "    pip install -r requirements.txt"
     )
 
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-from stocky import metrics
+from stocky import experiment, metrics
+from stocky.features import FEATURE_COLUMNS, build_features, make_model
 
 # --------------------------------------------------------------------------- #
 # Configuration
@@ -54,33 +54,19 @@ FOREX_PAIRS = ["USDINR=X", "EURUSD=X", "GBPUSD=X", "AUDUSD=X"]
 
 HISTORY_PERIOD = "5y"        # 5 years of daily candles
 DATA_INTERVAL = "1d"
-RSI_PERIOD = 14
-SMA_FAST = 20
-SMA_SLOW = 50
 
 # Minimum number of clean (NaN-free) rows required to bother training. With a
 # 50-day SMA we lose ~50 rows up front; this leaves a healthy training sample.
 MIN_TRAINING_ROWS = 150
 
-TRAIN_FRAC = 0.50            # chronological train / validation / locked-OOS split
-VAL_FRAC = 0.20              # remainder (30%) is the locked OOS set, scored once
-# Total model configs tried so far across all experiment rounds (Bonferroni
-# denominator, together with the tickers in a batch). Phase B bumps this.
-N_CONFIGS_TRIED = 1
-RANDOM_STATE = 42
-N_ESTIMATORS = 200
+TRAIN_FRAC = metrics.TRAIN_FRAC   # chronological train / validation / locked-OOS split
+VAL_FRAC = metrics.VAL_FRAC       # remainder (30%) is the locked OOS set, scored once
+# Total configs tried across all Phase B rounds (Bonferroni denominator, together
+# with the tickers in a batch). Read from experiments.json; 1 before any loop.
+N_CONFIGS_TRIED = max(1, experiment.State.load().configs_tried)
 
 EQUITY_OUTPUT = "context_indian_stocks.txt"
 FOREX_OUTPUT = "context_forex.txt"
-
-FEATURE_COLUMNS = [
-    "rsi14",
-    "sma20",
-    "sma50",
-    "daily_return",
-    "close_vs_sma20",   # price positioning relative to fast SMA
-    "close_vs_sma50",   # price positioning relative to slow SMA
-]
 
 logging.basicConfig(
     level=logging.INFO,
@@ -186,33 +172,6 @@ def _flatten_columns(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
 # --------------------------------------------------------------------------- #
 
 
-def compute_rsi(close: pd.Series, period: int = RSI_PERIOD) -> pd.Series:
-    """Wilder-smoothed Relative Strength Index over `period` days."""
-    delta = close.diff()
-    gain = delta.clip(lower=0.0)
-    loss = -delta.clip(upper=0.0)
-
-    # Wilder's smoothing == EWMA with alpha = 1/period.
-    avg_gain = gain.ewm(alpha=1.0 / period, min_periods=period, adjust=False).mean()
-    avg_loss = loss.ewm(alpha=1.0 / period, min_periods=period, adjust=False).mean()
-
-    rs = avg_gain / avg_loss.replace(0.0, np.nan)
-    rsi = 100.0 - (100.0 / (1.0 + rs))
-    # When avg_loss is 0 (pure uptrend), RSI saturates to 100.
-    rsi = rsi.where(avg_loss != 0.0, 100.0)
-    return rsi
-
-
-def compute_sma(close: pd.Series, window: int) -> pd.Series:
-    """Simple moving average over `window` days."""
-    return close.rolling(window=window, min_periods=window).mean()
-
-
-def compute_daily_returns(close: pd.Series) -> pd.Series:
-    """Day-over-day percentage return."""
-    return close.pct_change()
-
-
 # --------------------------------------------------------------------------- #
 # Data fetch + feature engineering
 # --------------------------------------------------------------------------- #
@@ -246,34 +205,6 @@ def fetch_history(ticker: str) -> Optional[pd.DataFrame]:
         return None
 
     return df
-
-
-def build_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Attach indicator columns, the feature set, and the ML target.
-
-    Target = 1 if the NEXT day's close is higher than today's, else 0.
-    The final row (which has no "next day") is dropped by the NaN filter.
-    """
-    out = df.copy()
-    close = out["Close"].astype(float)
-
-    out["rsi14"] = compute_rsi(close, RSI_PERIOD)
-    out["sma20"] = compute_sma(close, SMA_FAST)
-    out["sma50"] = compute_sma(close, SMA_SLOW)
-    out["daily_return"] = compute_daily_returns(close)
-
-    # Relative positioning features (how far price sits above/below each SMA).
-    out["close_vs_sma20"] = (close - out["sma20"]) / out["sma20"]
-    out["close_vs_sma50"] = (close - out["sma50"]) / out["sma50"]
-
-    # Target: next-day direction. fwd_return is the realized next-day return the
-    # signal is scored against (IC); it is never a model input.
-    out["target"] = (close.shift(-1) > close).astype(int)
-    out["fwd_return"] = close.shift(-1) / close - 1.0
-    # The shifted-in NaN on the last row marks "no future" -> excluded on dropna.
-    out.loc[out.index[-1], "target"] = np.nan
-
-    return out
 
 
 # --------------------------------------------------------------------------- #
@@ -335,11 +266,7 @@ def analyze_ticker(ticker: str, alpha_adj: float = metrics.ALPHA) -> TickerProfi
         log.warning("  %s skipped: %s", ticker, profile.reason)
         return profile
 
-    model = RandomForestClassifier(
-        n_estimators=N_ESTIMATORS,
-        random_state=RANDOM_STATE,
-        n_jobs=-1,
-    )
+    model = make_model()
     try:
         model.fit(X_train, y_train)
         y_pred = model.predict(X_oos)

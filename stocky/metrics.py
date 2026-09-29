@@ -17,6 +17,8 @@ import pandas as pd
 from scipy import stats
 
 ALPHA = 0.05
+TRAIN_FRAC = 0.50   # chronological split; the remaining 30% is the locked OOS set
+VAL_FRAC = 0.20
 DEFAULT_LAGS = (1, 5, 10, 20, 50)
 ICIR_STRONG = 0.5
 ICIR_MODERATE = 0.3
@@ -135,7 +137,9 @@ class Split:
     oos: slice
 
 
-def three_way_split(n: int, train_frac: float = 0.5, val_frac: float = 0.2) -> Split:
+def three_way_split(
+    n: int, train_frac: float = TRAIN_FRAC, val_frac: float = VAL_FRAC
+) -> Split:
     """Chronological train / validation / locked-OOS split (OOS = the remainder,
     default last 30%). Never shuffled."""
     if not (train_frac > 0 and val_frac > 0 and train_frac + val_frac < 1):
