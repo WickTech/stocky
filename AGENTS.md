@@ -10,7 +10,7 @@ Local ML market-intelligence tool. **Educational only. Never live trading, never
   - `guides-catalog.md` — 95 raycfu.com guides; "Trading & finance" section is the relevant one.
   - `plans/02-stocky-loop-engineering.md` — **the plan for this repo. Start here.**
   - `plans/01,03–07` — plans for other repos (kalakaarian, lumen-rag, axion, autoflow, Samya, ai-orc/nimbus). Reference only; do not implement here.
-- `.gitlab-ci.yml` — syntax check (mirrors `.github/workflows/ci.yml`; remove the GitHub one after migration if desired).
+- `.github/workflows/ci.yml` — syntax check + pytest.
 
 ## Work queue (in order)
 1. **Plan 02 Phase A** — `stocky/metrics.py`: IC/ICIR, signal half-life, train/val/locked-OOS split, Bonferroni; write results into `context_*.txt`; unit tests on synthetic series with known answers.

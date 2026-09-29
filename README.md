@@ -95,9 +95,10 @@ What happens:
 
 1. Downloads 5 years of daily candles for each ticker (needs internet).
 2. Computes 14-day RSI, 20- & 50-day SMAs, and daily returns.
-3. Trains a Random Forest per ticker with a **chronological 80/20** train/test split
-   (no shuffling — the future is never leaked into training).
-4. Backtests on the 20% hold-out and reads next-day direction + confidence on today's data.
+3. Trains a Random Forest per ticker with a **chronological 50/20/30** train/validation/
+   locked-OOS split (no shuffling — the future is never leaked into training).
+4. Scores accuracy, ICIR, half-life and the Bonferroni-gated OOS verdict (see Scorecard),
+   and reads next-day direction + confidence on today's data.
 5. Writes the two context files into the current directory, overwriting yesterday's:
    - `context_indian_stocks.txt`
    - `context_forex.txt`
@@ -169,6 +170,24 @@ Key conventions baked into the rules:
 
 ---
 
+## Scorecard (Plan 02 Phase A)
+
+Accuracy on next-day direction is weak evidence, so each context file also reports
+(computed in `stocky/metrics.py`, unit-tested on synthetic series):
+
+- **Split:** chronological 50% train / 20% validation / 30% **locked OOS** (scored once).
+- **Val ICIR:** monthly rank-IC of P(up) vs next-day return on validation; mean/std.
+  Bands: >0.5 strong, 0.3–0.5 moderate, <0.3 noise.
+- **Half-life:** days for signal autocorrelation to halve (AR(1) fit); lags 1/5/10/20/50 shown.
+- **OOS verdict:** PASS only if OOS rank-IC > 0 and its two-sided p-value is below the
+  **Bonferroni-adjusted α = 0.05 / (tickers in batch × configs tried)**. Currently 1 config,
+  so α = 0.01 for the 5 equities and 0.0125 for the 4 forex pairs. The config count must be
+  raised every time a new model/feature variant is tried (Phase B logs this in `experiments.md`).
+
+Run the tests: `pip install -r requirements-dev.txt && python -m pytest tests -q`.
+
+---
+
 ## Configuration
 
 Edit the constants near the top of `market_intelligence.py`:
@@ -179,7 +198,8 @@ Edit the constants near the top of `market_intelligence.py`:
 | `HISTORY_PERIOD` | History window (default `"5y"`). |
 | `RSI_PERIOD`, `SMA_FAST`, `SMA_SLOW` | Indicator lookbacks (14 / 20 / 50). |
 | `MIN_TRAINING_ROWS` | Minimum clean rows before a ticker is modeled. |
-| `TEST_SIZE`, `N_ESTIMATORS` | Hold-out fraction and forest size. |
+| `TRAIN_FRAC`, `VAL_FRAC`, `N_ESTIMATORS` | Train / validation fractions (rest is locked OOS) and forest size. |
+| `N_CONFIGS_TRIED` | Configs tried so far; feeds the Bonferroni denominator. |
 
 ---
 

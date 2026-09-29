@@ -42,7 +42,8 @@ except ImportError:  # pragma: no cover - dependency guard
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
+
+from stocky import metrics
 
 # --------------------------------------------------------------------------- #
 # Configuration
@@ -61,7 +62,11 @@ SMA_SLOW = 50
 # 50-day SMA we lose ~50 rows up front; this leaves a healthy training sample.
 MIN_TRAINING_ROWS = 150
 
-TEST_SIZE = 0.20             # chronological 80/20 split
+TRAIN_FRAC = 0.50            # chronological train / validation / locked-OOS split
+VAL_FRAC = 0.20              # remainder (30%) is the locked OOS set, scored once
+# Total model configs tried so far across all experiment rounds (Bonferroni
+# denominator, together with the tickers in a batch). Phase B bumps this.
+N_CONFIGS_TRIED = 1
 RANDOM_STATE = 42
 N_ESTIMATORS = 200
 
@@ -110,6 +115,16 @@ class TickerProfile:
     prediction: Optional[int] = None       # 1 = UP, 0 = DOWN
     confidence: float = float("nan")       # probability of the predicted class (0..1)
     n_rows: int = 0
+
+    # Scorecard (stocky.metrics). Validation = model-selection set; OOS = locked set.
+    val_icir: float = float("nan")         # ICIR of monthly rank-IC on validation
+    val_icir_months: int = 0
+    oos_ic: float = float("nan")           # rank-IC over the whole OOS window
+    oos_n: int = 0
+    oos_alpha: float = float("nan")        # Bonferroni-adjusted alpha used
+    oos_verdict: str = "n/a"               # PASS / FAIL / n/a
+    half_life_days: float = float("nan")
+    autocorr: dict = field(default_factory=dict)
 
     extra: dict = field(default_factory=dict)
 
@@ -251,8 +266,10 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     out["close_vs_sma20"] = (close - out["sma20"]) / out["sma20"]
     out["close_vs_sma50"] = (close - out["sma50"]) / out["sma50"]
 
-    # Target: next-day direction.
+    # Target: next-day direction. fwd_return is the realized next-day return the
+    # signal is scored against (IC); it is never a model input.
     out["target"] = (close.shift(-1) > close).astype(int)
+    out["fwd_return"] = close.shift(-1) / close - 1.0
     # The shifted-in NaN on the last row marks "no future" -> excluded on dropna.
     out.loc[out.index[-1], "target"] = np.nan
 
@@ -264,8 +281,10 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
 # --------------------------------------------------------------------------- #
 
 
-def analyze_ticker(ticker: str) -> TickerProfile:
+def analyze_ticker(ticker: str, alpha_adj: float = metrics.ALPHA) -> TickerProfile:
     """Full per-ticker pipeline: fetch -> features -> train -> predict.
+
+    `alpha_adj` is the Bonferroni-adjusted significance level for the OOS gate.
 
     Always returns a TickerProfile; on any data problem it returns one with
     `available=False` and a human-readable `reason`.
@@ -290,7 +309,7 @@ def analyze_ticker(ticker: str) -> TickerProfile:
     profile.daily_return = _safe(last.get("daily_return"))
 
     # Clean training set: features + target all present.
-    model_cols = FEATURE_COLUMNS + ["target"]
+    model_cols = FEATURE_COLUMNS + ["target", "fwd_return"]
     clean = featured[model_cols].replace([np.inf, -np.inf], np.nan).dropna()
     profile.n_rows = len(clean)
 
@@ -305,12 +324,13 @@ def analyze_ticker(ticker: str) -> TickerProfile:
     X = clean[FEATURE_COLUMNS].values
     y = clean["target"].values.astype(int)
 
-    # Chronological (non-shuffled) 80/20 split — never leak the future.
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=TEST_SIZE, shuffle=False
-    )
+    # Chronological (non-shuffled) train / validation / locked-OOS split — never
+    # leak the future. The OOS slice is scored exactly once, below.
+    split = metrics.three_way_split(len(clean), TRAIN_FRAC, VAL_FRAC)
+    X_train, y_train = X[split.train], y[split.train]
+    X_oos, y_oos = X[split.oos], y[split.oos]
 
-    if len(X_train) == 0 or len(X_test) == 0 or len(np.unique(y_train)) < 2:
+    if len(X_train) == 0 or len(X_oos) == 0 or len(np.unique(y_train)) < 2:
         profile.reason = "not enough class variety / samples after split"
         log.warning("  %s skipped: %s", ticker, profile.reason)
         return profile
@@ -322,8 +342,32 @@ def analyze_ticker(ticker: str) -> TickerProfile:
     )
     try:
         model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        profile.accuracy = _safe(accuracy_score(y_test, y_pred))
+        y_pred = model.predict(X_oos)
+        profile.accuracy = _safe(accuracy_score(y_oos, y_pred))
+
+        # Signal = P(up); scored against the realized next-day return.
+        up_col = list(model.classes_).index(1)
+        proba = model.predict_proba(X)[:, up_col]
+        signal = pd.Series(proba, index=clean.index)
+        fwd = clean["fwd_return"]
+        val_idx, oos_idx = clean.index[split.val], clean.index[split.oos]
+
+        ic_monthly = metrics.monthly_ic(signal.loc[val_idx], fwd.loc[val_idx])
+        profile.val_icir = _safe(metrics.icir(ic_monthly))
+        profile.val_icir_months = len(ic_monthly)
+
+        profile.oos_ic = _safe(
+            metrics.information_coefficient(signal.loc[oos_idx], fwd.loc[oos_idx])
+        )
+        profile.oos_n = len(oos_idx)
+        profile.oos_alpha = alpha_adj
+        profile.oos_verdict = metrics.oos_verdict(
+            profile.oos_ic, profile.oos_n, alpha_adj
+        )
+
+        held_out = signal.loc[clean.index[split.val.start :]]
+        profile.half_life_days = _safe(metrics.half_life(held_out))
+        profile.autocorr = metrics.signal_autocorr(held_out)
     except Exception as exc:
         profile.reason = f"model training failed: {exc}"
         log.warning("  %s skipped: %s", ticker, profile.reason)
@@ -351,11 +395,13 @@ def analyze_ticker(ticker: str) -> TickerProfile:
 
     profile.available = True
     log.info(
-        "  %s -> %s  (acc %.1f%%, conf %.1f%%)",
+        "  %s -> %s  (acc %.1f%%, conf %.1f%%, ICIR %s, OOS %s)",
         ticker,
         "UP" if profile.prediction == 1 else "DOWN",
         profile.accuracy * 100.0,
         profile.confidence * 100.0,
+        _fmt(profile.val_icir, 2),
+        profile.oos_verdict,
     )
     return profile
 
@@ -378,6 +424,18 @@ def _pct(value: float) -> str:
     if np.isnan(v):
         return "n/a"
     return f"{v * 100.0:.1f}%"
+
+
+def _fmt_half_life(days: float) -> str:
+    if np.isnan(_safe(days)):
+        return "n/a"
+    return f"{days:.1f} days"
+
+
+def _fmt_autocorr(ac: dict) -> str:
+    if not ac:
+        return "n/a"
+    return ", ".join(f"L{lag}={_fmt(v, 2)}" for lag, v in ac.items())
 
 
 def _direction(pred: Optional[int]) -> str:
@@ -427,7 +485,16 @@ def render_profile(profile: TickerProfile, decimals: int) -> str:
             f"  SMA(20)       : {_fmt(profile.sma20, decimals)}",
             f"  SMA(50)       : {_fmt(profile.sma50, decimals)}",
             f"  Trend Read    : {trend}",
-            f"  Model Accuracy: {_pct(profile.accuracy)}  (backtested on 20% hold-out)",
+            f"  Model Accuracy: {_pct(profile.accuracy)}  (locked OOS, last "
+            f"{(1 - TRAIN_FRAC - VAL_FRAC) * 100:.0f}%)",
+            f"  Val ICIR      : {_fmt(profile.val_icir, 2)} "
+            f"[{metrics.icir_band(profile.val_icir)}]  "
+            f"({profile.val_icir_months} monthly rank-IC obs)",
+            f"  OOS IC        : {_fmt(profile.oos_ic, 3)}  (n={profile.oos_n})",
+            f"  Half-Life     : {_fmt_half_life(profile.half_life_days)}  "
+            f"(autocorr {_fmt_autocorr(profile.autocorr)})",
+            f"  OOS Verdict   : {profile.oos_verdict}  "
+            f"(IC>0 and p < Bonferroni alpha {_fmt(profile.oos_alpha, 4)})",
             f"  Prediction    : {_direction(profile.prediction)} (next-day direction)",
             f"  Confidence    : {_pct(profile.confidence)}",
             f"  Train Rows    : {profile.n_rows}",
@@ -466,15 +533,29 @@ def write_context_file(
     out.append("-" * 70)
     out.append("SUMMARY")
     out.append("-" * 70)
-    out.append(f"{'Ticker':<14}{'Signal':<8}{'Conf':<9}{'Acc':<9}{'RSI':<8}")
+    out.append(
+        f"{'Ticker':<14}{'Signal':<8}{'Conf':<9}{'Acc':<9}{'RSI':<8}"
+        f"{'ICIR':<8}{'HL(d)':<8}{'OOS':<6}"
+    )
     for p in profiles:
         if p.available:
             out.append(
                 f"{p.ticker:<14}{_direction(p.prediction):<8}"
                 f"{_pct(p.confidence):<9}{_pct(p.accuracy):<9}{_fmt(p.rsi14, 1):<8}"
+                f"{_fmt(p.val_icir, 2):<8}{_fmt(p.half_life_days, 1):<8}{p.oos_verdict:<6}"
             )
         else:
-            out.append(f"{p.ticker:<14}{'N/A':<8}{'-':<9}{'-':<9}{'-':<8}")
+            out.append(
+                f"{p.ticker:<14}{'N/A':<8}{'-':<9}{'-':<9}{'-':<8}{'-':<8}{'-':<8}{'-':<6}"
+            )
+    out.append("")
+    out.append(
+        f"OOS gate: rank-IC > 0 with two-sided p < Bonferroni-adjusted alpha "
+        f"(alpha {metrics.ALPHA} / (tickers in batch x {N_CONFIGS_TRIED} config(s)))."
+    )
+    out.append(
+        "ICIR bands: >0.5 strong, 0.3-0.5 moderate, <0.3 noise. Accuracy alone is weak evidence."
+    )
     out.append("")
     out.append("NOTE: Signals are probabilistic tilts, not certainties. Apply the")
     out.append("stocky risk rules (RSI Reality Check, 1:2 R:R, confidence filters)")
@@ -495,9 +576,10 @@ def write_context_file(
 def run_batch(tickers: list[str]) -> list[TickerProfile]:
     """Analyze a list of tickers, isolating failures per ticker."""
     results: list[TickerProfile] = []
+    alpha_adj = metrics.bonferroni_alpha(metrics.ALPHA, len(tickers) * N_CONFIGS_TRIED)
     for ticker in tickers:
         try:
-            results.append(analyze_ticker(ticker))
+            results.append(analyze_ticker(ticker, alpha_adj))
         except Exception as exc:  # last-resort guard — never let one ticker abort the run
             log.exception("Unexpected error on %s: %s", ticker, exc)
             results.append(
