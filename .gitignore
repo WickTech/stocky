@@ -25,3 +25,8 @@ __pycache__/
 # Phase C decision records stay local (template is tracked)
 decisions/*.md
 !decisions/TEMPLATE.md
+.venv-ta/
+
+# Phase D spike outputs (local)
+second_opinions/
+second_opinions.csv

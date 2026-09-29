@@ -49,12 +49,15 @@ to turn the raw signals into disciplined, risk-first trade plans.
 | `market_intelligence.py` | The daily engine — fetch, model, write context files. |
 | `.project_instructions.md` | Standing rulebook uploaded **once** to your Claude Project. |
 | `context_indian_stocks.txt` | **Generated** daily — NSE equity technical profiles. |
+| `context_global_stocks.txt` | **Generated** daily — US/Europe/Japan/HK equity profiles (local currency). |
 | `context_forex.txt` | **Generated** daily — forex profiles (4-decimal pip prices). |
 | `README.md` | This file. |
 
 The default universe (edit the constants at the top of `market_intelligence.py` to change):
 
 - **Indian stocks:** `RELIANCE.NS`, `TCS.NS`, `INFY.NS`, `HDFCBANK.NS`, `SBIN.NS`
+- **Global stocks:** `AAPL`, `MSFT`, `NVDA`, `JPM`, `ASML.AS`, `SAP.DE`, `SHEL.L`, `7203.T`, `0700.HK`
+  (local-currency prices; written to `context_global_stocks.txt`)
 - **Forex pairs:** `USDINR=X`, `EURUSD=X`, `GBPUSD=X`, `AUDUSD=X`
 
 ---
@@ -185,6 +188,22 @@ Accuracy on next-day direction is weak evidence, so each context file also repor
   raised every time a new model/feature variant is tried (Phase B logs this in `experiments.md`).
 
 Run the tests: `pip install -r requirements-dev.txt && python -m pytest tests -q`.
+
+---
+
+## Optional: TradingAgents second opinion (Plan 02 Phase D)
+
+Research-only LLM debate on one ticker, using free keys. It lives in a **separate venv** so its
+LangChain stack cannot break the pinned stocky dependencies.
+
+```bash
+uv venv .venv-ta --python 3.12
+uv pip install --python .venv-ta/bin/python "git+https://github.com/TauricResearch/TradingAgents.git"
+cp .env.example .env            # then fill in a free GOOGLE_API_KEY (+ optional TYPESAFE_API_KEY)
+.venv-ta/bin/python scripts/ta_spike.py TCS.NS
+```
+
+Outputs go to `second_opinions/` and `second_opinions.csv` (both gitignored). Never a trade trigger.
 
 ---
 

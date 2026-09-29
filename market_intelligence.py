@@ -50,6 +50,12 @@ from stocky.features import FEATURE_COLUMNS, build_features, make_model
 # --------------------------------------------------------------------------- #
 
 INDIAN_STOCKS = ["RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "SBIN.NS"]
+# Global large caps across exchanges (Yahoo Finance tickers, local-currency prices).
+GLOBAL_STOCKS = [
+    "AAPL", "MSFT", "NVDA", "JPM",          # US
+    "ASML.AS", "SAP.DE", "SHEL.L",          # Netherlands, Germany, UK
+    "7203.T", "0700.HK",                    # Japan, Hong Kong
+]
 FOREX_PAIRS = ["USDINR=X", "EURUSD=X", "GBPUSD=X", "AUDUSD=X"]
 
 HISTORY_PERIOD = "5y"        # 5 years of daily candles
@@ -66,6 +72,7 @@ VAL_FRAC = metrics.VAL_FRAC       # remainder (30%) is the locked OOS set, score
 N_CONFIGS_TRIED = max(1, experiment.State.load().configs_tried)
 
 EQUITY_OUTPUT = "context_indian_stocks.txt"
+GLOBAL_OUTPUT = "context_global_stocks.txt"
 FOREX_OUTPUT = "context_forex.txt"
 
 logging.basicConfig(
@@ -533,6 +540,22 @@ def main() -> int:
         ],
     )
 
+    # --- Global equities ---------------------------------------------------- #
+    log.info("=== Global Equities ===")
+    global_profiles = run_batch(GLOBAL_STOCKS)
+    write_context_file(
+        GLOBAL_OUTPUT,
+        "STOCKY :: GLOBAL EQUITY TECHNICAL CONTEXT (US / Europe / Japan / HK)",
+        global_profiles,
+        decimals=2,
+        header_notes=[
+            "Lens: multi-market swing setups. Prices are in each listing's LOCAL",
+            "currency (USD, EUR, GBp/GBP, JPY, HKD) — never compare levels across",
+            "tickers, and never mix with the NSE file. Exchange calendars differ, so",
+            "'next day' means the next session on that exchange. RSI > 70 = overbought.",
+        ],
+    )
+
     # --- Forex -------------------------------------------------------------- #
     log.info("=== Forex Pairs ===")
     forex_profiles = run_batch(FOREX_PAIRS)
@@ -549,15 +572,18 @@ def main() -> int:
     )
 
     eq_ok = sum(p.available for p in equity_profiles)
+    gl_ok = sum(p.available for p in global_profiles)
     fx_ok = sum(p.available for p in forex_profiles)
     log.info(
-        "Done. Equities modeled %d/%d, Forex modeled %d/%d.",
+        "Done. India %d/%d, Global %d/%d, Forex %d/%d.",
         eq_ok,
         len(equity_profiles),
+        gl_ok,
+        len(global_profiles),
         fx_ok,
         len(forex_profiles),
     )
-    log.info("Outputs: %s, %s", EQUITY_OUTPUT, FOREX_OUTPUT)
+    log.info("Outputs: %s, %s, %s", EQUITY_OUTPUT, GLOBAL_OUTPUT, FOREX_OUTPUT)
     return 0
 
 
