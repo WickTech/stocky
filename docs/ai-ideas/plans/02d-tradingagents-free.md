@@ -59,3 +59,12 @@ Tags follow `docs/research-chain.md`.
 - 2026-09-29 TCS.NS: key works, yfinance path reached the Market/Fundamentals analysts; run aborted at the
   Fundamentals Analyst on Gemini free-tier daily quota (20 req/model/day). No decision produced.
   Next: try Groq or OpenRouter free models, or a local Ollama model (no quota).
+- 2026-09-29 TCS.NS (trade date 2026-09-28), deep `gemini-3-flash-preview` + quick `gemini-3.5-flash-lite`:
+  **completed in 103 s, decision Overweight** (agent view: buy near lower Bollinger band, RSI 31).
+  Gemini 2.5 models return 404 for this account ("no longer available to new users"); usable now:
+  3.1-flash-lite, 3.5-flash-lite, 3.5-flash, 3-flash-preview (3.6/3.7 flash returned 503 demand spikes).
+  Two earlier attempts died on transient 503s (once at the very last step, Portfolio Manager) - retry helps.
+  Issues: (1) StockTwits returned HTTP 403 for TCS.NS, so Jev had no posts to screen - Jev's value for .NS
+  is UNPROVEN (jev_enabled=True only means the key was set); (2) FRED key rejected: not a 32-char lowercase
+  alphanumeric string, macro data skipped; (3) Alpha Vantage never called (yfinance-only) - VERIFIED not needed.
+  Single sample: no evidence about decision quality yet; needs >=30 logged calls vs realized returns.

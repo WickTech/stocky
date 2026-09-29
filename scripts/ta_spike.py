@@ -3,7 +3,7 @@
 
     .venv-ta/bin/python scripts/ta_spike.py TCS.NS
     .venv-ta/bin/python scripts/ta_spike.py AAPL --date 2026-09-26 --provider google \
-        --deep gemini-3.8-flash --quick gemini-3.8-flash
+        --deep gemini-3-flash-preview --quick gemini-3.5-flash-lite
 
 Research second opinion only — never a trade trigger. Keys are read from .env
 (gitignored) or the environment. Writes local files under second_opinions/ (gitignored)
@@ -53,14 +53,21 @@ def main() -> int:
     ap.add_argument("ticker")
     ap.add_argument("--date", default=None, help="YYYY-MM-DD (default: last weekday)")
     ap.add_argument("--provider", default="google")
-    ap.add_argument("--deep", default="gemini-3.8-flash")
-    ap.add_argument("--quick", default="gemini-3.8-flash")
+    ap.add_argument("--deep", default="gemini-3-flash-preview")
+    ap.add_argument("--quick", default="gemini-3.5-flash-lite")
     args = ap.parse_args()
 
     load_env(ROOT / ".env")
 
+    from tradingagents.dataflows import router
     from tradingagents.default_config import DEFAULT_CONFIG
     from tradingagents.graph.trading_graph import TradingAgentsGraph
+
+    # Register a stub so prediction markets (Polymarket) stay off: the router raises on
+    # an unregistered vendor name instead of degrading, even for optional categories.
+    router.VENDOR_METHODS["get_prediction_markets"]["none"] = (
+        lambda *a, **k: "Prediction-market data disabled for this run."
+    )
 
     config = DEFAULT_CONFIG.copy()
     config["llm_provider"] = args.provider
