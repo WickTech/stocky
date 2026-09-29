@@ -1,7 +1,38 @@
 {
   "baseline": 0.33813305468845817,
-  "best": 0.33813305468845817,
-  "configs_tried": 1,
-  "rounds": [],
-  "finalized": false
+  "best": 0.4862801288086107,
+  "configs_tried": 6,
+  "rounds": [
+    {
+      "round": 1,
+      "hypothesis": "Drop raw sma20/sma50 price levels (non-stationary); keep only scale-free features",
+      "score": 0.12047504373440433,
+      "decision": "REVERT"
+    },
+    {
+      "round": 2,
+      "hypothesis": "Add 5d and 20d momentum returns",
+      "score": 0.3669190369533583,
+      "decision": "REVERT"
+    },
+    {
+      "round": 3,
+      "hypothesis": "Regularize RF: min_samples_leaf=20, max_depth=6 (noisy target)",
+      "score": 0.4157405708849045,
+      "decision": "KEEP"
+    },
+    {
+      "round": 4,
+      "hypothesis": "Add 20d realized volatility (regime feature)",
+      "score": 0.4862801288086107,
+      "decision": "KEEP"
+    },
+    {
+      "round": 5,
+      "hypothesis": "Add 5d return (short-term reversal) on regularized+vol base",
+      "score": 0.5093957381292851,
+      "decision": "REVERT"
+    }
+  ],
+  "finalized": true
 }

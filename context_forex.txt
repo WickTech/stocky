@@ -1,6 +1,6 @@
 ======================================================================
 STOCKY :: FOREX TECHNICAL CONTEXT (relative strength / macro)
-Generated: 2026-09-29 09:06:24
+Generated: 2026-09-29 09:12:14
 Universe: 4 tickers  |  Modeled OK: 4
 ======================================================================
 
@@ -9,79 +9,79 @@ Lens: relative currency strength + macro. Prices quoted to 4 decimals
 headwind for import-heavy sectors and banks.
 
 ### USDINR=X
-  Last Close    : 95.9625
+  Last Close    : 95.9700
   Daily Return  : 0.2%
-  RSI(14)       : 55.1
-  SMA(20)       : 95.4175
-  SMA(50)       : 95.5005
+  RSI(14)       : 55.2
+  SMA(20)       : 95.4179
+  SMA(50)       : 95.5006
   Trend Read    : Mixed / no clean trend
-  Model Accuracy: 49.3%  (locked OOS, last 30%)
-  Val ICIR      : 0.41 [moderate]  (12 monthly rank-IC obs)
-  OOS IC        : 0.114  (n=375)
-  Half-Life     : 1.6 days  (autocorr L1=0.65, L5=0.46, L10=0.22, L20=0.17, L50=0.01)
-  OOS Verdict   : FAIL  (IC>0 and p < Bonferroni alpha 0.0125)
+  Model Accuracy: 52.3%  (locked OOS, last 30%)
+  Val ICIR      : 0.90 [strong]  (12 monthly rank-IC obs)
+  OOS IC        : 0.116  (n=375)
+  Half-Life     : 2.3 days  (autocorr L1=0.74, L5=0.52, L10=0.27, L20=0.13, L50=0.01)
+  OOS Verdict   : FAIL  (IC>0 and p < Bonferroni alpha 0.0021)
   Prediction    : DOWN (next-day direction)
-  Confidence    : 79.0%
+  Confidence    : 61.1%
   Train Rows    : 1250
 
 ### EURUSD=X
-  Last Close    : 1.1349
+  Last Close    : 1.1347
   Daily Return  : -0.3%
-  RSI(14)       : 23.3  [OVERSOLD <30]
+  RSI(14)       : 23.1  [OVERSOLD <30]
   SMA(20)       : 1.1521
-  SMA(50)       : 1.1536
+  SMA(50)       : 1.1535
   Trend Read    : Downtrend (price < SMA20 < SMA50)
-  Model Accuracy: 52.8%  (locked OOS, last 30%)
-  Val ICIR      : 0.17 [noise]  (12 monthly rank-IC obs)
-  OOS IC        : 0.029  (n=375)
-  Half-Life     : 1.8 days  (autocorr L1=0.68, L5=0.43, L10=0.39, L20=0.30, L50=0.19)
-  OOS Verdict   : FAIL  (IC>0 and p < Bonferroni alpha 0.0125)
+  Model Accuracy: 53.1%  (locked OOS, last 30%)
+  Val ICIR      : 0.75 [strong]  (12 monthly rank-IC obs)
+  OOS IC        : 0.071  (n=375)
+  Half-Life     : 7.5 days  (autocorr L1=0.91, L5=0.74, L10=0.60, L20=0.40, L50=0.11)
+  OOS Verdict   : FAIL  (IC>0 and p < Bonferroni alpha 0.0021)
   Prediction    : UP (next-day direction)
-  Confidence    : 52.0%
+  Confidence    : 52.3%
   Train Rows    : 1250
 
 ### GBPUSD=X
-  Last Close    : 1.3232
+  Last Close    : 1.3230
   Daily Return  : 0.0%
-  RSI(14)       : 28.1  [OVERSOLD <30]
+  RSI(14)       : 27.7  [OVERSOLD <30]
   SMA(20)       : 1.3423
   SMA(50)       : 1.3464
   Trend Read    : Downtrend (price < SMA20 < SMA50)
-  Model Accuracy: 54.1%  (locked OOS, last 30%)
-  Val ICIR      : 0.35 [moderate]  (12 monthly rank-IC obs)
-  OOS IC        : 0.043  (n=375)
-  Half-Life     : 1.3 days  (autocorr L1=0.58, L5=0.38, L10=0.27, L20=0.07, L50=-0.03)
-  OOS Verdict   : FAIL  (IC>0 and p < Bonferroni alpha 0.0125)
+  Model Accuracy: 51.2%  (locked OOS, last 30%)
+  Val ICIR      : 1.19 [strong]  (12 monthly rank-IC obs)
+  OOS IC        : -0.069  (n=375)
+  Half-Life     : 2.2 days  (autocorr L1=0.73, L5=0.54, L10=0.37, L20=0.18, L50=-0.13)
+  OOS Verdict   : FAIL  (IC>0 and p < Bonferroni alpha 0.0021)
   Prediction    : UP (next-day direction)
-  Confidence    : 77.5%
+  Confidence    : 52.6%
   Train Rows    : 1250
 
 ### AUDUSD=X
-  Last Close    : 0.6993
-  Daily Return  : -0.2%
-  RSI(14)       : 29.8  [OVERSOLD <30]
-  SMA(20)       : 0.7128
+  Last Close    : 0.6991
+  Daily Return  : -0.3%
+  RSI(14)       : 29.6  [OVERSOLD <30]
+  SMA(20)       : 0.7127
   SMA(50)       : 0.7093
   Trend Read    : Mixed / no clean trend
-  Model Accuracy: 53.6%  (locked OOS, last 30%)
-  Val ICIR      : 0.30 [moderate]  (12 monthly rank-IC obs)
-  OOS IC        : 0.083  (n=375)
-  Half-Life     : 1.7 days  (autocorr L1=0.66, L5=0.47, L10=0.37, L20=0.37, L50=0.29)
-  OOS Verdict   : FAIL  (IC>0 and p < Bonferroni alpha 0.0125)
-  Prediction    : DOWN (next-day direction)
-  Confidence    : 50.0%
+  Model Accuracy: 49.1%  (locked OOS, last 30%)
+  Val ICIR      : 0.99 [strong]  (12 monthly rank-IC obs)
+  OOS IC        : 0.052  (n=375)
+  Half-Life     : 5.0 days  (autocorr L1=0.87, L5=0.66, L10=0.57, L20=0.44, L50=0.27)
+  OOS Verdict   : FAIL  (IC>0 and p < Bonferroni alpha 0.0021)
+  Prediction    : UP (next-day direction)
+  Confidence    : 53.1%
   Train Rows    : 1250
 
 ----------------------------------------------------------------------
 SUMMARY
 ----------------------------------------------------------------------
 Ticker        Signal  Conf     Acc      RSI     ICIR    HL(d)   OOS   
-USDINR=X      DOWN    79.0%    49.3%    55.1    0.41    1.6     FAIL  
-EURUSD=X      UP      52.0%    52.8%    23.3    0.17    1.8     FAIL  
-GBPUSD=X      UP      77.5%    54.1%    28.1    0.35    1.3     FAIL  
-AUDUSD=X      DOWN    50.0%    53.6%    29.8    0.30    1.7     FAIL  
+USDINR=X      DOWN    61.1%    52.3%    55.2    0.90    2.3     FAIL  
+EURUSD=X      UP      52.3%    53.1%    23.1    0.75    7.5     FAIL  
+GBPUSD=X      UP      52.6%    51.2%    27.7    1.19    2.2     FAIL  
+AUDUSD=X      UP      53.1%    49.1%    29.6    0.99    5.0     FAIL  
 
-OOS gate: rank-IC > 0 with two-sided p < Bonferroni-adjusted alpha (alpha 0.05 / (tickers in batch x 1 config(s))).
+OOS gate: rank-IC > 0 with two-sided p < Bonferroni-adjusted alpha (alpha 0.05 / (tickers in batch x 6 config(s))).
 ICIR bands: >0.5 strong, 0.3-0.5 moderate, <0.3 noise. Accuracy alone is weak evidence.
 
 NOTE: Signals are probabilistic tilts, not certainties. Apply the

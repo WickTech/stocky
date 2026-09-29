@@ -21,12 +21,15 @@ FEATURE_COLUMNS = [
     "daily_return",
     "close_vs_sma20",   # price positioning relative to fast SMA
     "close_vs_sma50",   # price positioning relative to slow SMA
+    "vol_20d",
 ]
 
 MODEL_PARAMS = {
     "n_estimators": 200,
     "random_state": 42,
     "n_jobs": -1,
+    "min_samples_leaf": 20,
+    "max_depth": 6,
 }
 
 
@@ -78,6 +81,8 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     # Relative positioning features (how far price sits above/below each SMA).
     out["close_vs_sma20"] = (close - out["sma20"]) / out["sma20"]
     out["close_vs_sma50"] = (close - out["sma50"]) / out["sma50"]
+
+    out["vol_20d"] = out["daily_return"].rolling(20, min_periods=20).std()
 
     # Target: next-day direction. fwd_return is the realized next-day return the
     # signal is scored against (IC); it is never a model input.
