@@ -3,7 +3,7 @@
 
     .venv-ta/bin/python scripts/ta_spike.py TCS.NS
     .venv-ta/bin/python scripts/ta_spike.py AAPL --date 2026-09-26 --provider google \
-        --deep gemini-2.5-flash --quick gemini-2.5-flash
+        --deep gemini-3.8-flash --quick gemini-3.8-flash
 
 Research second opinion only — never a trade trigger. Keys are read from .env
 (gitignored) or the environment. Writes local files under second_opinions/ (gitignored)
@@ -53,8 +53,8 @@ def main() -> int:
     ap.add_argument("ticker")
     ap.add_argument("--date", default=None, help="YYYY-MM-DD (default: last weekday)")
     ap.add_argument("--provider", default="google")
-    ap.add_argument("--deep", default="gemini-2.5-flash")
-    ap.add_argument("--quick", default="gemini-2.5-flash")
+    ap.add_argument("--deep", default="gemini-3.8-flash")
+    ap.add_argument("--quick", default="gemini-3.8-flash")
     args = ap.parse_args()
 
     load_env(ROOT / ".env")
@@ -66,6 +66,7 @@ def main() -> int:
     config["llm_provider"] = args.provider
     config["deep_think_llm"] = args.deep
     config["quick_think_llm"] = args.quick
+    config["llm_max_retries"] = 6   # free tier returns transient 503s under load
     config["max_debate_rounds"] = 1
     config["max_risk_discuss_rounds"] = 1
     # Free / keyless-friendly: yfinance for everything; no SEC key needed for non-US.

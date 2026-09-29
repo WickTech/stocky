@@ -15,7 +15,9 @@ Tags follow `docs/research-chain.md`.
 | Optional: FRED macro (free key), Jev sentiment screening (`TYPESAFE_API_KEY`) | VERIFIED | README. Jev pricing/free tier UNVERIFIED |
 | Alpha Vantage key listed as required for technical indicators | PARTLY UNVERIFIED | README lists it; whether yfinance-only mode works without it not tested |
 | README disclaimer: research only, not financial advice | VERIFIED | README |
-| Free-tier rate limits of Gemini / Groq / OpenRouter `:free` | UNVERIFIED | not fetched; these change often — check before relying |
+| Gemini free tier limit for `gemini-3.8-flash` | **VERIFIED (spike, 2026-09-29): 20 requests/day/project/model** | API 429 `GenerateRequestsPerDayPerProjectPerModel-FreeTier`, quotaValue 20. One TradingAgents run needs far more calls -> Gemini free tier is NOT viable for a full run on this model |
+| Gemini `gemini-2.5-flash` availability | VERIFIED unavailable to new keys | API 404: suggests `gemini-3.8-flash`; transient 503 "high demand" also seen |
+| Groq / OpenRouter `:free` limits | UNVERIFIED | not tested yet |
 | Small local models (7–8B) give usable multi-agent debate + tool calls | UNVERIFIED | must be tested |
 
 ## This machine
@@ -52,3 +54,8 @@ Tags follow `docs/research-chain.md`.
 - Local Ollama only, or allow free cloud keys (Gemini/Groq/OpenRouter)?
 - OK to install Ollama (≈ GB downloads) in WSL and a second venv?
 - Jev sentiment: try it (needs `TYPESAFE_API_KEY`; free tier UNVERIFIED) or skip?
+
+## Spike log
+- 2026-09-29 TCS.NS: key works, yfinance path reached the Market/Fundamentals analysts; run aborted at the
+  Fundamentals Analyst on Gemini free-tier daily quota (20 req/model/day). No decision produced.
+  Next: try Groq or OpenRouter free models, or a local Ollama model (no quota).
