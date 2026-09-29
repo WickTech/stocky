@@ -73,7 +73,7 @@ def main() -> int:
     config["llm_provider"] = args.provider
     config["deep_think_llm"] = args.deep
     config["quick_think_llm"] = args.quick
-    config["llm_max_retries"] = 6   # free tier returns transient 503s under load
+    config["llm_max_retries"] = 15  # free tier: 15 req/min per model + transient 503s; back off and retry
     config["max_debate_rounds"] = 1
     config["max_risk_discuss_rounds"] = 1
     # Free / keyless-friendly: yfinance for everything; no SEC key needed for non-US.
