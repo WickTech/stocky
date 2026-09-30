@@ -68,3 +68,12 @@ Tags follow `docs/research-chain.md`.
   is UNPROVEN (jev_enabled=True only means the key was set); (2) FRED key rejected: not a 32-char lowercase
   alphanumeric string, macro data skipped; (3) Alpha Vantage never called (yfinance-only) - VERIFIED not needed.
   Single sample: no evidence about decision quality yet; needs >=30 logged calls vs realized returns.
+- 2026-09-30: started the 30-sample batch. `scripts/gen_spike_batch.py` queued 30 historical
+  (ticker,date) pairs (5 Indian tickers x 6 dates, Jun-Aug 2026, each >20 trading days before today
+  so 1d/5d/20d returns are already determinable — no waiting on future prices, only on quota).
+  `scripts/run_spike_batch.py` runs one pending pair per invocation; a crontab entry (08:15 local,
+  `crontab -l`) runs it + `scripts/fill_realized_returns.py` daily. 2nd sample (RELIANCE.NS,
+  2026-06-02): decision Hold, 96s, no errors besides the known StockTwits-404/FRED-format noise.
+  At 1/day this finishes ~2026-10-29; if free-tier quota allows more than 1/day some days, rerun
+  `run_spike_batch.py` manually to go faster. Do not judge decision quality until all 30 rows have
+  realized returns filled — single-sample "Overweight"/"Hold" reads are not evidence either way.

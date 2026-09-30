@@ -17,7 +17,13 @@ Local ML market-intelligence tool. **Educational only. Never live trading, never
 2. ~~**Plan 02 Phase B**~~ DONE (0/9 pass OOS; see experiments.md) — Karpathy loop (`program.md`, `experiments.md`), max 5 rounds, no OOS peeking.
 3. ~~**Plan 02 Phase C**~~ DONE (docs/research-chain.md) — 5-prompt verified research chain (VERIFIED/STALE/UNVERIFIED tags, decision records).
 4. **Trading-bot idea (new, unplanned)** — paper-trading executor that consumes the stocky signal. Reference guide: `claude-fable-trading-bot` (raycfu.com/guides/claude-fable-trading-bot) — not yet read; fetch it and write `docs/ai-ideas/plans/08-trading-bot.md` before coding. LLM agents (TradingAgents, guides #78/#79) = research second opinion, never the trade trigger. Polymarket agent (#91) = separate, high-risk track; do not start without explicit approval.
-5. Plan 02 Phase D — `.venv-ta` + `scripts/ta_spike.py` ready; waiting on free API keys in `.env` (see `.env.example`), then run the spike and record results in `docs/ai-ideas/plans/02d-tradingagents-free.md`.
+5. Plan 02 Phase D (in progress) — spike works (Gemini free tier, ~100s/run). Collecting the 30-sample
+   reflection log before judging decision quality: `scripts/gen_spike_batch.py` queued 30 historical
+   (ticker,date) pairs in `second_opinions_queue.csv` (dates already >20 trading days old so returns
+   are computable), a daily crontab entry (`crontab -l`, 08:15 local) runs `scripts/run_spike_batch.py`
+   + `scripts/fill_realized_returns.py` one pair/day (~30 days to finish, gated by free-tier quota).
+   2/30 done as of 2026-09-30. Judge decision quality only after all 30 land, same rank-IC/Bonferroni
+   discipline as Phase B — no anecdotes. Results in `docs/ai-ideas/plans/02d-tradingagents-free.md`.
 
 ## Acceptance (from plan 02)
 - `python market_intelligence.py` still runs end-to-end; CI green.

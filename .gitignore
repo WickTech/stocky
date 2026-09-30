@@ -30,3 +30,5 @@ decisions/*.md
 # Phase D spike outputs (local)
 second_opinions/
 second_opinions.csv
+second_opinions_queue.csv
+spike_batch.log
