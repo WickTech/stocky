@@ -77,3 +77,8 @@ Tags follow `docs/research-chain.md`.
   At 1/day this finishes ~2026-10-29; if free-tier quota allows more than 1/day some days, rerun
   `run_spike_batch.py` manually to go faster. Do not judge decision quality until all 30 rows have
   realized returns filled — single-sample "Overweight"/"Hold" reads are not evidence either way.
+- 2026-09-30: **Jev conclusion.** `TYPESAFE_API_KEY` is set in `.env`, so `jev_enabled=True` on every
+  batch row, but StockTwits (Jev's post source) 403/404s on every `.NS` ticker tried — Jev screens 0
+  posts, contributes nothing. It's dead weight for the Indian-ticker batch specifically; unproven
+  either way for US tickers (StockTwits does cover those, untested here). Leaving the key set for now
+  since it costs nothing but the call; would need a non-StockTwits source to actually matter for `.NS`.
