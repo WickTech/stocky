@@ -1,6 +1,6 @@
 """Feature engineering and model parameters.
 
-This is the ONLY file the Phase B experiment loop may edit (see program.md).
+This is the ONLY file the Phase B experiment loop may edit (see docs/program.md).
 metrics.py, the split, and the locked OOS set are read-only.
 """
 

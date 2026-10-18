@@ -185,7 +185,7 @@ Accuracy on next-day direction is weak evidence, so each context file also repor
 - **OOS verdict:** PASS only if OOS rank-IC > 0 and its two-sided p-value is below the
   **Bonferroni-adjusted α = 0.05 / (tickers in batch × configs tried)**. Currently 1 config,
   so α = 0.01 for the 5 equities and 0.0125 for the 4 forex pairs. The config count must be
-  raised every time a new model/feature variant is tried (Phase B logs this in `experiments.md`).
+  raised every time a new model/feature variant is tried (Phase B logs this in `docs/experiments.md`).
 
 Run the tests: `pip install -r requirements-dev.txt && python -m pytest tests -q`.
 

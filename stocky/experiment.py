@@ -1,4 +1,4 @@
-"""Phase B experiment harness (read-only for the loop — see program.md).
+"""Phase B experiment harness (read-only for the loop — see docs/program.md).
 
 Scores a feature/model config by mean *validation* ICIR over the universe on
 frozen cached data, enforces the round cap and keep/revert rule, and runs the
@@ -31,7 +31,7 @@ MAX_ROUNDS = 5
 MIN_GAIN = 0.05            # validation-ICIR gain needed to KEEP a change
 MIN_CLEAN_ROWS = 150
 STATE_PATH = Path("experiments.json")
-LOG_PATH = Path("experiments.md")
+LOG_PATH = Path("docs/experiments.md")
 CACHE_DIR = Path(".cache")
 
 UNIVERSE = [
