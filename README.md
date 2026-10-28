@@ -189,6 +189,14 @@ Accuracy on next-day direction is weak evidence, so each context file also repor
 
 Run the tests: `pip install -r requirements-dev.txt && python -m pytest tests -q`.
 
+**Test coverage (49 tests):**
+
+| Module | Tests | What's covered |
+|--------|-------|----------------|
+| `features.py` | 18 | RSI bounds/saturation, SMA warmup, `build_features` contract, target alignment, no-mutation, `close_vs_sma` sign invariant, `vol_20d` |
+| `metrics.py` | ~15 | IC perfect/inverse, Spearman, noisy signal, ICIR, half-life |
+| `experiment.py` | ~16 | OOS isolation, keep/revert, round cap, state machine, Bonferroni α |
+
 ---
 
 ## Optional: TradingAgents second opinion (Plan 02 Phase D)
